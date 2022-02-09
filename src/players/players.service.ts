@@ -1,7 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MakePlayerDto } from './dtos/makePlayer.dto';
 import { Player } from './interfaces/player.interface';
-import { v4 as uuidv4 } from 'uuid';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -29,8 +28,8 @@ export class PlayersService {
     return await this.PlayerModel.find().exec();
   }
 
-  async findPlayerByEmail(email: string): Promise<Player> {
-    const player = await this.PlayerModel.findOne({ email }).exec();
+  async findPlayerById(id: number): Promise<Player> {
+    const player = await this.PlayerModel.findOne({ id }).exec();
 
     if (!player) throw new NotFoundException('Email desconhecido');
 
