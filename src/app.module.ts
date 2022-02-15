@@ -6,7 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
     PlayersModule,
     MongooseModule.forRoot(
-      'mongodb+srv://golldan:<password>!7676@golldans.hi3na.mongodb.net/Golldans?retryWrites=true&w=majority',
+      'mongodb+srv://golldan:@golldans.hi3na.mongodb.net/Golldans?retryWrites=true&w=majority',
       {},
     ),
   ],

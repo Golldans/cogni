@@ -10,34 +10,33 @@ export class PlayersService {
     @InjectModel('Player') private readonly PlayerModel: Model<Player>,
   ) {}
   private readonly logger = new Logger(PlayersService.name);
-  private players: Player[] = [];
 
-  async makeUpdatePlayer(MakePlayerDto: MakePlayerDto): Promise<void> {
+  async makePlayer(MakePlayerDto: MakePlayerDto): Promise<Player> {
+    return this.make(MakePlayerDto);
+  }
+
+  async updatePlayer(_id, MakePlayerDto: MakePlayerDto): Promise<Player> {
     const { email } = MakePlayerDto;
 
-    const existingPlayer = await this.PlayerModel.findOne({ email }).exec();
+    this.checkForOneEmail(email);
 
-    if (existingPlayer) {
-      this.update(MakePlayerDto);
-    } else {
-      this.make(MakePlayerDto);
-    }
+    return this.update(_id, MakePlayerDto);
   }
 
   async findAllPlayers(): Promise<Player[]> {
     return await this.PlayerModel.find().exec();
   }
 
-  async findPlayerById(id: number): Promise<Player> {
-    const player = await this.PlayerModel.findOne({ id }).exec();
-
-    if (!player) throw new NotFoundException('Email desconhecido');
+  async findPlayerById(id: string): Promise<Player> {
+    const player = await this.checkForOneId(id);
 
     return player;
   }
 
-  async deletePlayer(email: string): Promise<any> {
-    return await this.PlayerModel.deleteOne({ email }).exec();
+  async deletePlayer(id: string): Promise<any> {
+    this.checkForOneId(id);
+
+    return await this.PlayerModel.deleteOne({ id }).exec();
   }
 
   private async make(makePlayerDto: MakePlayerDto): Promise<Player> {
@@ -46,10 +45,26 @@ export class PlayersService {
     return await newPlayer.save();
   }
 
-  private async update(MakePlayerDto: MakePlayerDto): Promise<Player> {
+  private async update(_id, MakePlayerDto: MakePlayerDto): Promise<Player> {
+    this.checkForOneId(_id);
+
     return await this.PlayerModel.findOneAndUpdate(
-      { email: MakePlayerDto.email },
-      { MakePlayerDto: MakePlayerDto },
+      { _id },
+      { $set: MakePlayerDto },
     ).exec();
+  }
+
+  private async checkForOneId(_id: string): Promise<Player> {
+    const player = this.PlayerModel.findById({ _id }).exec();
+
+    if (!player) throw new NotFoundException('ID desconhecido chefia');
+
+    return player;
+  }
+
+  private async checkForOneEmail(email: string): Promise<void> {
+    const player = this.PlayerModel.findOne({ email });
+
+    if (!player) throw new NotFoundException('Email já cadastrado');
   }
 }

@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -21,13 +22,24 @@ export class PlayersController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  async makeUpdatePlayer(@Body() MakePlayerDto: MakePlayerDto) {
-    await this.playersService.makeUpdatePlayer(MakePlayerDto);
+  async makePlayer(@Body() MakePlayerDto: MakePlayerDto): Promise<Player> {
+    const player = await this.playersService.makePlayer(MakePlayerDto);
+    return player;
+  }
+
+  @Put('/:_id')
+  @UsePipes(ValidationPipe)
+  async updatePlayer(
+    @Body() MakePlayerDto: MakePlayerDto,
+    @Param('_id', PlayerValidationParamsPipe) _id: string,
+  ): Promise<Player> {
+    const player = await this.playersService.updatePlayer(_id, MakePlayerDto);
+    return player;
   }
 
   @Get('/:id')
   async findPlayersById(
-    @Param('id', PlayerValidationParamsPipe) id: number,
+    @Param('id', PlayerValidationParamsPipe) id: string,
   ): Promise<Player> {
     return this.playersService.findPlayerById(id);
   }
@@ -37,11 +49,11 @@ export class PlayersController {
     return this.playersService.findAllPlayers();
   }
 
-  @Delete()
+  @Delete('/:_id')
   async deletePlayer(
-    @Query('email', PlayerValidationParamsPipe) email: string,
+    @Param('_id', PlayerValidationParamsPipe) _id: string,
   ): Promise<void> {
-    this.playersService.deletePlayer(email);
+    this.playersService.deletePlayer(_id);
     return;
   }
 }
